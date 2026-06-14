@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wintech Labs - Unattended Toolkit XP Edition</title>
+    <style>
+        /* Fundo Desktop Windows XP */
+        body { 
+            font-family: Tahoma, 'Segoe UI', sans-serif; 
+            background-color: #004e98; 
+            margin: 0;
+            padding: 3rem 1rem;
+            display: flex;
+            justify-content: center;
+            color: #000;
+        }
+
+        /* Estrutura da Janela XP */
+        .window {
+            width: 100%;
+            max-width: 950px;
+            background-color: #0055e5;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            overflow: hidden;
+            border: 1px solid #00138c;
+        }
+
+        /* Barra de Título Luna Theme */
+        .title-bar {
+            background: linear-gradient(to bottom, #0058e6 0%, #3a93ff 8%, #288eff 40%, #127dff 88%, #036bfe 100%);
+            padding: 5px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .title-bar-text {
+            color: white;
+            font-weight: bold;
+            font-size: 13px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+            letter-spacing: 0.5px;
+        }
+
+        .title-bar-controls {
+            display: flex;
+            gap: 2px;
+        }
+
+        .win-btn {
+            width: 21px; height: 21px;
+            border-radius: 3px;
+            border: 1px solid white;
+            background-color: #e54b4b;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            line-height: 18px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: inset 0 -2px 3px rgba(0,0,0,0.2);
+        }
+
+        /* Corpo da Aplicação (Bege Win32) */
+        .window-body {
+            background-color: #ece9d8; 
+            padding: 15px;
+            border: 2px solid #0055e5;
+            border-top: none;
+        }
+
+        /* Sistema de Separadores */
+        .tab-container { 
+            display: flex; 
+            border-bottom: 1px solid #aca899; 
+            flex-wrap: wrap; 
+            padding-top: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .tab-button {
+            background-color: #f3f3f3; 
+            border: 1px solid #fff; 
+            border-right: 1px solid #aca899;
+            border-bottom: none;
+            padding: 6px 14px; 
+            cursor: pointer;
+            font-size: 13px; 
+            font-family: Tahoma, sans-serif;
+            border-radius: 4px 4px 0 0;
+            margin-right: 2px;
+            position: relative;
+            top: 1px;
+            color: #333;
+        }
+
+        .tab-button:hover { background-color: #fafafa; }
+        
+        .tab-button.active { 
+            background-color: #ece9d8; 
+            border-left: 1px solid #fff;
+            border-top: 1px solid #fff;
+            border-right: 1px solid #aca899;
+            padding-bottom: 7px;
+            z-index: 10;
+        }
+
+        .tab-content { display: none; padding: 5px; }
+        .tab-content.active { display: block; }
+
+        /* Layout e Agrupamentos */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        @media(max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+        
+        fieldset { 
+            border: 1px solid #aca899; 
+            border-radius: 4px; 
+            padding: 15px; 
+            margin-bottom: 15px; 
+            background-color: transparent; 
+        }
+        legend { color: #0033d4; padding: 0 4px; font-size: 12px; font-weight: bold; }
+        
+        /* Controlos de Formulário */
+        .form-group { margin-bottom: 10px; }
+        label { display: block; margin-bottom: 3px; font-size: 12px; }
+        input[type="text"], input[type="password"], input[type="number"], select { 
+            width: 100%; padding: 4px; 
+            border: 1px solid #7f9db9; 
+            box-sizing: border-box; 
+            font-family: Tahoma, sans-serif;
+            font-size: 12px;
+        }
+        
+        .checkbox-label { display: flex; align-items: center; cursor: pointer; font-size: 12px; margin-bottom: 6px; }
+        .checkbox-label input { margin-right: 6px; }
+        
+        .warning { color: #d13438; font-size: 11px; margin-top: 2px; display: block; }
+        .info-text { color: #666; font-size: 11px; margin-top: 2px; display: block; font-style: italic; }
+        .software-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+        
+        .btn-link {
+            display: inline-block; padding: 4px 8px; color: #0000FF;
+            text-decoration: underline; font-size: 12px; margin-top: 5px; margin-right: 10px;
+            cursor: pointer;
+        }
+        .btn-link:hover { color: #FF0000; }
+        
+        /* Botões 3D Clássicos */
+        .main-btn { 
+            background-color: #f3f3f3; 
+            color: #000; 
+            border: 1px solid #fff;
+            border-right-color: #aca899;
+            border-bottom-color: #aca899;
+            padding: 8px 20px; 
+            cursor: pointer; 
+            border-radius: 3px; 
+            font-size: 12px; 
+            font-weight: bold;
+            font-family: Tahoma, sans-serif;
+            transition: 0.1s; 
+            margin-top: 15px;
+            float: right;
+        }
+        .main-btn:active {
+            border: 1px solid #aca899;
+            border-right-color: #fff;
+            border-bottom-color: #fff;
+            background-color: #ebebeb;
+            padding: 9px 19px 7px 21px; 
+        }
+
+        .secondary-btn { float: none; display: block; margin-top: 10px; font-weight: normal; }
+        .clearfix::after { content: ""; clear: both; display: table; }
+    </style>
+</head>
+<body>
+    <div class="window">
+        <div class="title-bar">
+            <div class="title-bar-text">Wintech Labs - Configuração do Sistema (Unattended)</div>
+            <div class="title-bar-controls">
+                <button type="button" class="win-btn" style="background-color: #3a93ff; font-size: 10px;">_</button>
+                <button type="button" class="win-btn" style="background-color: #3a93ff;">□</button>
+                <button type="button" class="win-btn">X</button>
+            </div>
+        </div>
+
+        <div class="window-body">
+            <form id="xmlForm" class="clearfix">
+                
+                <div class="tab-container">
+                    <button type="button" class="tab-button active" onclick="openTab(event, 'tabGeral')">Base & Ambiente</button>
+                    <button type="button" class="tab-button" onclick="openTab(event, 'tabOtimizacoes')">Otimizações & Software</button>
+                    <button type="button" class="tab-button" onclick="openTab(event, 'tabRede')">Rede Avançada</button>
+                    <button type="button" class="tab-button" onclick="openTab(event, 'tabFerramentas')">Ferramentas USB</button>
+                </div>
+
+                <div id="tabGeral" class="tab-content active">
+                    <div class="grid">
+                        <div>
+                            <fieldset>
+                                <legend>Propriedades do Sistema</legend>
+                                <div class="form-group">
+                                    <label for="computerName">Nome do Computador:</label>
+                                    <input type="text" id="computerName" value="SRV-LAB-01" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="userName">Conta de Administrador:</label>
+                                    <input type="text" id="userName" value="Admin" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="userPass">Palavra-passe:</label>
+                                    <input type="password" id="userPass" value="Root123!" required>
+                                </div>
+                                <label class="checkbox-label"><input type="checkbox" id="autoLogon" checked> Iniciar sessão automaticamente no arranque</label>
+                            </fieldset>
+                            
+                            <fieldset style="background-color: #f7f7f7; border-color: #aca899;">
+                                <legend>Configurações Regionais</legend>
+                                <p style="font-size: 11px; margin-top: 0; color: #666;">Define o layout base para omitir os ecrãs iniciais.</p>
+                                <div class="form-group">
+                                    <label for="sysLang">Idioma e Teclado:</label>
+                                    <select id="sysLang">
+                                        <option value="pt-PT" data-kbd="0816:00000816">Português (Portugal)</option>
+                                        <option value="pt-BR" data-kbd="0416:00000416">Português (Brasil)</option>
+                                        <option value="en-US" data-kbd="0409:00000409">Inglês (Estados Unidos)</option>
+                                        <option value="en-GB" data-kbd="0809:00000809">Inglês (Reino Unido)</option>
+                                        <option value="es-ES" data-kbd="0c0a:0000040a">Espanhol (Espanha)</option>
+                                        <option value="fr-FR" data-kbd="040c:0000040c">Francês (França)</option>
+                                    </select>
+                                </div>
+                            </fieldset>
+                            
+                            <fieldset style="background-color: #ffffe1; border-color: #aca899;">
+                                <legend>Edição da Imagem ISO</legend>
+                                <div class="form-group">
+                                    <select id="winEdition">
+                                        <option value="Windows 11 Pro">Windows 11 Pro</option>
+                                        <option value="Windows 11 Home">Windows 11 Home</option>
+                                        <option value="Windows 11 Education">Windows 11 Education</option>
+                                        <option value="Windows 11 Enterprise">Windows 11 Enterprise</option>
+                                    </select>
+                                </div>
+                            </fieldset>
+                        </div>
+                        <div>
+                            <fieldset style="background-color: #e8f4ff; border-color: #3a93ff;">
+                                <legend>Ambiente de Destino</legend>
+                                <label class="checkbox-label" style="font-weight: bold; color: #0033d4;">
+                                    <input type="radio" name="targetEnv" value="vm" checked onchange="updateDiskSafety()"> Máquina Virtual (Laboratório)
+                                </label>
+                                <label class="checkbox-label" style="font-weight: bold; color: #0033d4;">
+                                    <input type="radio" name="targetEnv" value="fisico" onchange="updateDiskSafety()"> Computador Físico (Produção)
+                                </label>
+                            </fieldset>
+
+                            <fieldset>
+                                <legend>Gestão de Instalação e Discos</legend>
+                                <label class="checkbox-label"><input type="checkbox" id="bypassTPM" checked> Contornar restrições de Hardware (TPM/Secure Boot)</label>
+                                <label class="checkbox-label"><input type="checkbox" id="skipEula" checked> Aceitar o Contrato de Licença (EULA)</label>
+                                <label class="checkbox-label"><input type="checkbox" id="disableTelemetry" checked> Desativar Telemetria e Omissão de Privacidade (OOBE)</label>
+                                
+                                <div style="margin-top: 15px; border-top: 1px dashed #aca899; padding-top: 10px;">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="wipeDisk" checked onchange="toggleDiskIdField()">
+                                        Limpar Disco e criar partições UEFI automaticamente
+                                    </label>
+                                    <div id="diskIdWrapper" class="form-group" style="margin-left: 20px; margin-top: 5px;">
+                                        <label for="diskId">ID do Disco de Destino:</label>
+                                        <input type="number" id="diskId" value="0" min="0" max="9" style="width: 60px;">
+                                        <span class="info-text">Nota: Para discos NVMe na VMware, use <b>0</b>. Para discos na porta IDE em Proxmox, use <b>1</b>.</span>
+                                    </div>
+                                    <span class="warning" id="wipeWarning">Aviso: Destrói os dados do disco de destino de forma irreversível.</span>
+                                </div>
+                            </fieldset>
+                            
+                            <fieldset>
+                                <legend>Informação OEM</legend>
+                                <div class="form-group">
+                                    <label for="oemName">Fabricante registado:</label>
+                                    <input type="text" id="oemName" value="Wintech Labs">
+                                </div>
+                                <div class="form-group">
+                                    <label for="oemUrl">Website de Suporte:</label>
+                                    <input type="text" id="oemUrl" value="https://www.wintech.pt">
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tabOtimizacoes" class="tab-content">
+                    <div class="grid">
+                        <div>
+                            <fieldset>
+                                <legend>Componentes do Windows</legend>
+                                <label class="checkbox-label"><input type="checkbox" id="featWSL"> Instalar Subsistema Windows para Linux (WSL)</label>
+                                <label class="checkbox-label"><input type="checkbox" id="featHyperV"> Instalar Plataforma Hyper-V</label>
+                            </fieldset>
+                            <fieldset>
+                                <legend>Ajustes de Registo (Tweaks)</legend>
+                                <label class="checkbox-label"><input type="checkbox" id="tweakDarkMode" checked> Aplicar Tema Escuro por predefinição</label>
+                                <label class="checkbox-label"><input type="checkbox" id="tweakClassicMenu" checked> Ativar Menus de Contexto Clássicos</label>
+                                <label class="checkbox-label"><input type="checkbox" id="tweakDebloat" checked> Remover software indesejado (Debloat Script)</label>
+                            </fieldset>
+                        </div>
+                        <div>
+                            <fieldset>
+                                <legend>Instalação Automática de Programas (Winget)</legend>
+                                <div class="software-grid">
+                                    <label class="checkbox-label"><input type="checkbox" name="software" value="Google.Chrome"> Google Chrome</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="software" value="Mozilla.Firefox"> Mozilla Firefox</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="software" value="7zip.7zip"> 7-Zip Archiver</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="software" value="VideoLAN.VLC"> VLC Media Player</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="software" value="Notepad++.Notepad++"> Notepad++</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="software" value="PuTTY.PuTTY"> PuTTY SSH Client</label>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tabRede" class="tab-content">
+                    <fieldset>
+                        <legend>Propriedades de Protocolo Internet (TCP/IP)</legend>
+                        <label class="checkbox-label" style="margin-bottom: 1rem; font-weight: bold;">
+                            <input type="checkbox" id="netStatic" onchange="toggleNetworkFields()"> 
+                            Utilizar o seguinte endereço IP (Ignorar DHCP)
+                        </label>
+                        <div id="networkFields" style="display: none; padding: 10px; border: 1px solid #aca899; background-color: white;">
+                            <div class="grid">
+                                <div class="form-group">
+                                    <label for="netIP">Endereço IP:</label>
+                                    <input type="text" id="netIP" value="192.168.1.50">
+                                </div>
+                                <div class="form-group">
+                                    <label for="netMask">Máscara de sub-rede:</label>
+                                    <input type="text" id="netMask" value="255.255.255.0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="netGW">Gateway predefinido:</label>
+                                    <input type="text" id="netGW" value="192.168.1.254">
+                                </div>
+                                <div class="form-group">
+                                    <label for="netDNS">Servidor DNS preferencial:</label>
+                                    <input type="text" id="netDNS" value="8.8.8.8">
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div id="tabFerramentas" class="tab-content">
+                    <fieldset>
+                        <legend>Assistente de Transferência</legend>
+                        <p style="margin-top:0;">Transfira a imagem de instalação oficial a partir dos servidores autorizados.</p>
+                        <a href="https://www.microsoft.com/software-download/windows11" target="_blank" class="btn-link">🔗 Obter Imagem ISO do Windows</a>
+                    </fieldset>
+
+                    <fieldset>
+                        <legend>Criação de Suporte Físico (USB)</legend>
+                        
+                        <div style="margin-top: 10px;">
+                            <strong>A. Utilizar Aplicações de Terceiros</strong><br>
+                            <span style="color:#666;">Crie a drive USB e copie o ficheiro XML para a sua diretoria principal.</span><br>
+                            <a href="https://rufus.ie/" target="_blank" class="btn-link">🔗 Transferir Rufus</a>
+                            <a href="https://www.ventoy.net/" target="_blank" class="btn-link">🔗 Transferir Ventoy</a>
+                        </div>
+
+                        <div style="margin-top: 20px; padding-top: 10px; border-top: 1px dashed #aca899;">
+                            <strong>B. Automação de Sistema (PowerShell)</strong><br>
+                            <span style="color:#666;">Gere um script que automatiza a formatação e a injeção dos ficheiros na Pen USB.</span><br>
+                            <button type="button" class="main-btn secondary-btn" onclick="generatePowerShellScript()">Gerar Script .ps1</button>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div style="border-top: 1px solid #aca899; margin-top: 20px; padding-top: 15px;">
+                    <button type="submit" class="main-btn" id="btnGerar">Aplicar e Gerar XML</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Mapeamento de chaves genéricas por edição
+        const editionKeys = {
+            "Windows 11 Pro": "VK7JG-NPHTM-C97JM-9MPGT-3V66T",
+            "Windows 11 Home": "YTMG3-N6DKC-DKB77-7M9GH-8HVX7",
+            "Windows 11 Education": "YNMGQ-8RYV3-4PGQ3-C8XTP-7CFBY",
+            "Windows 11 Enterprise": "NPPR9-FWDCX-D2C8J-H872K-2YT43"
+        };
+
+        function openTab(evt, tabName) {
+            evt.preventDefault();
+            const tabContents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabContents.length; i++) tabContents[i].classList.remove("active");
+            
+            const tabButtons = document.getElementsByClassName("tab-button");
+            for (let i = 0; i < tabButtons.length; i++) tabButtons[i].classList.remove("active");
+            
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
+        function toggleDiskIdField() {
+            const wipeCheckbox = document.getElementById('wipeDisk');
+            const diskIdWrapper = document.getElementById('diskIdWrapper');
+            diskIdWrapper.style.display = wipeCheckbox.checked ? "block" : "none";
+        }
+
+        function updateDiskSafety() {
+            const isPhysical = document.querySelector('input[name="targetEnv"]:checked').value === 'fisico';
+            const wipeCheckbox = document.getElementById('wipeDisk');
+            const wipeWarning = document.getElementById('wipeWarning');
+            const diskIdWrapper = document.getElementById('diskIdWrapper');
+            
+            if (isPhysical) {
+                wipeCheckbox.checked = false;
+                wipeCheckbox.disabled = true;
+                diskIdWrapper.style.display = "none";
+                wipeWarning.innerText = "Aviso: Desativado por segurança em máquinas físicas.";
+                wipeWarning.style.color = "#666";
+            } else {
+                wipeCheckbox.disabled = false;
+                wipeCheckbox.checked = true;
+                diskIdWrapper.style.display = "block";
+                wipeWarning.innerText = "Aviso: Destrói os dados do disco de destino de forma irreversível.";
+                wipeWarning.style.color = "#d13438";
+            }
+        }
+
+        function toggleNetworkFields() {
+            const isChecked = document.getElementById('netStatic').checked;
+            document.getElementById('networkFields').style.display = isChecked ? "block" : "none";
+        }
+
+        function maskToCidr(mask) {
+            return mask.split('.').reduce((c, o) => c + (o >>> 0).toString(2).split('1').length - 1, 0);
+        }
+
+        function generatePowerShellScript() {
+            const psScript = `# Script de Automação de Media USB - Wintech Labs\nClear-Host\nWrite-Host "=== Automatizador de Instalação USB - Windows 11 ===" -ForegroundColor Cyan\nWrite-Host ""\n$drive = Read-Host "Introduza a letra da Pen USB a formatar (Exemplo: E)"\n$iso = Read-Host "Introduza o caminho completo do ficheiro ISO (Exemplo: C:\\Downloads\\Windows11.iso)"\nif (!(Test-Path $iso)) {\n    Write-Host "[ERRO] Ficheiro ISO não encontrado no caminho especificado!" -ForegroundColor Red\n    Exit\n}\nWrite-Host ""\nWrite-Host "AVISO: Todos os dados na drive \${drive}: serão completamente destruídos!" -ForegroundColor Yellow\n$confirm = Read-Host "Deseja continuar? (S/N)"\nif ($confirm -ne "S" -and $confirm -ne "s") {\n    Write-Host "Operação cancelada." -ForegroundColor Magenta\n    Exit\n}\nWrite-Host "A formatar a drive \${drive}: em NTFS..." -ForegroundColor Green\nFormat-Volume -DriveLetter $drive -FileSystem NTFS -NewFileSystemLabel "Win11Unattend" -Confirm:\$false\nWrite-Host "A montar a imagem ISO do Windows 11..." -ForegroundColor Green\n$mount = Mount-DiskImage -ImagePath $iso -PassThru\n$isoDrive = (\$mount | Get-Volume).DriveLetter\nif (!\$isoDrive) {\n    Write-Host "[ERRO] Falha ao ler a letra montada." -ForegroundColor Red\n    Exit\n}\nWrite-Host "A copiar ficheiros (isto pode demorar)..." -ForegroundColor Green\nxcopy.exe "\${isoDrive}:\\*.*" "\${drive}:\\" /E /H /F /K /Y\nif (Test-Path "autounattend.xml") {\n    Copy-Item "autounattend.xml" "\${drive}:\\" -Force\n    Write-Host "[SUCESSO] XML injetado na raiz da Pen!" -ForegroundColor Green\n} else {\n    Write-Host "[AVISO] autounattend.xml não encontrado na pasta local." -ForegroundColor Yellow\n}\nDismount-DiskImage -ImagePath $iso\nWrite-Host "Concluído!" -ForegroundColor Green\n`;
+            const blob = new Blob([psScript], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'criar_pen.ps1';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // MOTOR DO FORMULÁRIO COM LÓGICA DE IDIOMA E TECLADO DINÂMICO
+        document.getElementById('xmlForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Variáveis Base
+            const compName = document.getElementById('computerName').value;
+            const userName = document.getElementById('userName').value;
+            const userPass = document.getElementById('userPass').value;
+            const autoLogon = document.getElementById('autoLogon').checked;
+            const winEdition = document.getElementById('winEdition').value;
+            const genericKey = editionKeys[winEdition];
+            
+            // Variáveis Regionais (As novas capturas)
+            const langSelect = document.getElementById('sysLang');
+            const sysLang = langSelect.value;
+            const sysKbd = langSelect.options[langSelect.selectedIndex].getAttribute('data-kbd');
+
+            const bypassTPM = document.getElementById('bypassTPM').checked;
+            const skipEula = document.getElementById('skipEula').checked;
+            const disableTelemetry = document.getElementById('disableTelemetry').checked;
+            const wipeDisk = document.getElementById('wipeDisk').checked;
+            const targetIsVM = document.querySelector('input[name="targetEnv"]:checked').value === 'vm';
+            const diskId = document.getElementById('diskId').value;
+            const featWSL = document.getElementById('featWSL').checked;
+            const featHyperV = document.getElementById('featHyperV').checked;
+            const tweakDarkMode = document.getElementById('tweakDarkMode').checked;
+            const tweakClassicMenu = document.getElementById('tweakClassicMenu').checked;
+            const tweakDebloat = document.getElementById('tweakDebloat').checked;
+            const netStatic = document.getElementById('netStatic').checked;
+
+            let xml = `<?xml version="1.0" encoding="utf-8"?>\n<unattend xmlns="urn:schemas-microsoft-com:unattend" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State">\n`;
+
+            // ----- FASE 1: windowsPE -----
+            xml += `  <settings pass="windowsPE">\n`;
+            
+            // A injeção dinâmica do Idioma na fase de Setup do ecrã azul/roxo
+            xml += `    <component name="Microsoft-Windows-International-Core-WinPE" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">\n`;
+            xml += `      <SetupUILanguage><UILanguage>${sysLang}</UILanguage></SetupUILanguage>\n`;
+            xml += `      <InputLocale>${sysKbd}</InputLocale>\n      <SystemLocale>${sysLang}</SystemLocale>\n      <UILanguage>${sysLang}</UILanguage>\n      <UserLocale>${sysLang}</UserLocale>\n`;
+            xml += `    </component>\n`;
+
+            xml += `    <component name="Microsoft-Windows-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">\n`;
+            
+            if(wipeDisk && targetIsVM) {
+                xml += `      <DiskConfiguration>
+        <Disk wcm:action="add">
+          <DiskID>${diskId}</DiskID>
+          <WillWipeDisk>true</WillWipeDisk>
+          <CreatePartitions>
+            <CreatePartition wcm:action="add"><Order>1</Order><Type>EFI</Type><Size>500</Size></CreatePartition>
+            <CreatePartition wcm:action="add"><Order>2</Order><Type>MSR</Type><Size>128</Size></CreatePartition>
+            <CreatePartition wcm:action="add"><Order>3</Order><Type>Primary</Type><Extend>true</Extend></CreatePartition>
+          </CreatePartitions>
+          <ModifyPartitions>
+            <ModifyPartition wcm:action="add"><Order>1</Order><PartitionID>1</PartitionID><Format>FAT32</Format></ModifyPartition>
+            <ModifyPartition wcm:action="add"><Order>2</Order><PartitionID>2</PartitionID></ModifyPartition>
+            <ModifyPartition wcm:action="add"><Order>3</Order><PartitionID>3</PartitionID><Format>NTFS</Format></ModifyPartition>
+          </ModifyPartitions>
+        </Disk>
+      </DiskConfiguration>\n`;
+            }
+
+            if(wipeDisk && targetIsVM) {
+                xml += `      <ImageInstall>
+        <OSImage>
+          <InstallTo><DiskID>${diskId}</DiskID><PartitionID>3</PartitionID></InstallTo>
+          <InstallFrom>
+            <MetaData wcm:action="add">
+              <Key>/IMAGE/NAME</Key>
+              <Value>${winEdition}</Value>
+            </MetaData>
+          </InstallFrom>
+        </OSImage>
+      </ImageInstall>\n`;
+            }
+
+            if(bypassTPM) {
+                let setupOrderCount = 1;
+                xml += `      <RunSynchronous>\n`;
+                xml += `        <RunSynchronousCommand wcm:action="add"><Order>${setupOrderCount++}</Order><Path>reg.exe add "HKLM\\SYSTEM\\Setup\\LabConfig" /v BypassTPMCheck /t REG_DWORD /d 1 /f</Path></RunSynchronousCommand>\n`;
+                xml += `        <RunSynchronousCommand wcm:action="add"><Order>${setupOrderCount++}</Order><Path>reg.exe add "HKLM\\SYSTEM\\Setup\\LabConfig" /v BypassSecureBootCheck /t REG_DWORD /d 1 /f</Path></RunSynchronousCommand>\n`;
+                xml += `        <RunSynchronousCommand wcm:action="add"><Order>${setupOrderCount++}</Order><Path>reg.exe add "HKLM\\SYSTEM\\Setup\\LabConfig" /v BypassRAMCheck /t REG_DWORD /d 1 /f</Path></RunSynchronousCommand>\n`;
+                xml += `        <RunSynchronousCommand wcm:action="add"><Order>${setupOrderCount++}</Order><Path>reg.exe add "HKLM\\SYSTEM\\Setup\\LabConfig" /v BypassCPUCheck /t REG_DWORD /d 1 /f</Path></RunSynchronousCommand>\n`;
+                xml += `        <RunSynchronousCommand wcm:action="add"><Order>${setupOrderCount++}</Order><Path>reg.exe add "HKLM\\SYSTEM\\Setup\\LabConfig" /v BypassStorageCheck /t REG_DWORD /d 1 /f</Path></RunSynchronousCommand>\n`;
+                xml += `      </RunSynchronous>\n`;
+            }
+
+            xml += `      <UserData>
+        <ProductKey>
+          <Key>${genericKey}</Key>
+          <WillShowUI>OnError</WillShowUI>
+        </ProductKey>
+        <AcceptEula>true</AcceptEula>
+      </UserData>\n`;
+
+            xml += `    </component>\n  </settings>\n`;
+
+            // ----- FASE 2: specialize -----
+            xml += `  <settings pass="specialize">\n`;
+            xml += `    <component name="Microsoft-Windows-Deployment" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">\n      <RunSynchronous>\n        <RunSynchronousCommand wcm:action="add">\n          <Order>1</Order>\n          <Path>reg.exe add "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\OOBE" /v BypassNRO /t REG_DWORD /d 1 /f</Path>\n        </RunSynchronousCommand>\n      </RunSynchronous>\n    </component>\n`;
+            xml += `    <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">\n      <ComputerName>${compName}</ComputerName>\n      <TimeZone>GMT Standard Time</TimeZone>\n    </component>\n  </settings>\n`;
+
+            // ----- FASE 3: oobeSystem -----
+            xml += `  <settings pass="oobeSystem">\n`;
+            
+            // A injeção do idioma selecionado no momento final do ambiente de trabalho do utilizador
+            xml += `    <component name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">\n`;
+            xml += `      <InputLocale>${sysKbd}</InputLocale>\n      <SystemLocale>${sysLang}</SystemLocale>\n      <UILanguage>${sysLang}</UILanguage>\n      <UserLocale>${sysLang}</UserLocale>\n`;
+            xml += `    </component>\n`;
+
+            xml += `    <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">\n`;
+            
+            if(autoLogon) {
+                xml += `      <AutoLogon><Password><Value>${userPass}</Value><PlainText>true</PlainText></Password><Enabled>true</Enabled><LogonCount>5</LogonCount><Username>${userName}</Username></AutoLogon>\n`;
+            }
+
+            let cmds = [];
+            cmds.push(`cmd.exe /c net accounts /maxpwage:unlimited`);
+            if(disableTelemetry) {
+                cmds.push(`reg.exe add "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection" /v AllowTelemetry /t REG_DWORD /d 0 /f`);
+            }
+            if(netStatic) {
+                const ip = document.getElementById('netIP').value;
+                const cidr = maskToCidr(document.getElementById('netMask').value);
+                const gw = document.getElementById('netGW').value;
+                const dns = document.getElementById('netDNS').value;
+                cmds.push(`powershell.exe -NoProfile -Command "New-NetIPAddress -InterfaceAlias 'Ethernet*' -IPAddress ${ip} -PrefixLength ${cidr} -DefaultGateway ${gw} -ErrorAction SilentlyContinue"`);
+                cmds.push(`powershell.exe -NoProfile -Command "Set-DnsClientServerAddress -InterfaceAlias 'Ethernet*' -ServerAddresses ${dns} -ErrorAction SilentlyContinue"`);
+            }
+            if(featWSL) cmds.push(`dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart`);
+            if(featHyperV) cmds.push(`dism.exe /online /enable-feature /featurename:Microsoft-Hyper-V-All /all /norestart`);
+            if(tweakClassicMenu) cmds.push(`reg.exe add "HKCU\\Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\\InprocServer32" /f /ve`);
+            if(tweakDarkMode) {
+                cmds.push(`reg.exe add "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize" /v AppsUseLightTheme /t REG_DWORD /d 0 /f`);
+                cmds.push(`reg.exe add "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize" /v SystemUsesLightTheme /t REG_DWORD /d 0 /f`);
+            }
+            if(tweakDebloat) {
+                cmds.push(`powershell.exe -NoProfile -Command "Get-AppxPackage -AllUsers | Where-Object {$_.Name -match 'Bing|Xbox|Zune|Solitaire|Skype'} | Remove-AppxPackage"`);
+            }
+            
+            // Winget Inteligente (Com delay de segurança para apanhar a rede e instalar o software)
+            const sw = document.querySelectorAll('input[name="software"]:checked');
+            if(sw.length > 0) {
+                let psCmds = "Start-Sleep -Seconds 15; ";
+                psCmds += "while(!(Test-Connection -ComputerName 8.8.8.8 -Count 1 -Quiet -ErrorAction SilentlyContinue)) { Start-Sleep -Seconds 5 }; ";
+                psCmds += "winget source update; ";
+                sw.forEach(cb => {
+                    psCmds += `winget install --id ${cb.value} --silent --accept-package-agreements --accept-source-agreements; `;
+                });
+                cmds.push(`powershell.exe -NoProfile -WindowStyle Hidden -Command "${psCmds}"`);
+            }
+            
+            if(cmds.length > 0) {
+                xml += `      <FirstLogonCommands>\n`;
+                cmds.forEach((cmd, idx) => {
+                    const safeCmd = cmd.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    xml += `        <SynchronousCommand wcm:action="add"><Order>${idx + 1}</Order><CommandLine>${safeCmd}</CommandLine></SynchronousCommand>\n`;
+                });
+                xml += `      </FirstLogonCommands>\n`;
+            }
+
+            // OOBE Supressão de Privacidade Completa
+            xml += `      <OOBE>\n`;
+            xml += `        <ProtectYourPC>3</ProtectYourPC>\n`;
+            if(skipEula) xml += `        <HideEULAPage>true</HideEULAPage>\n`;
+            xml += `        <NetworkLocation>Work</NetworkLocation><HideLocalAccountScreen>true</HideLocalAccountScreen><HideOnlineAccountScreens>true</HideOnlineAccountScreens><HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE><HideOEMRegistrationScreen>true</HideOEMRegistrationScreen>\n      </OOBE>\n`;
+            
+            xml += `      <UserAccounts><LocalAccounts><LocalAccount wcm:action="add">\n            <Name>${userName}</Name><Group>Administrators</Group><Password><Value>${userPass}</Value><PlainText>true</PlainText></Password>\n          </LocalAccount></LocalAccounts></UserAccounts>\n`;
+
+            xml += `    </component>\n  </settings>\n</unattend>`;
+
+            const blob = new Blob([xml], { type: 'text/xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'autounattend.xml';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+    </script>
+</body>
+</html>
