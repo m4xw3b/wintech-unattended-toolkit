@@ -2,6 +2,8 @@
 
 # Wintech Labs - Unattended Toolkit (XP Edition) 💿
 
+![Ecrã Principal do Wintech Labs Unattended Toolkit](unattended.png)
+
 Um gerador HTML/JS leve e poderoso para criar ficheiros `autounattend.xml` à prova de falhas para o Windows 11. Especialmente otimizado para resolver os problemas de *Loop de Boot* nas builds mais recentes (24H2 / 25H2) em ambientes de virtualização e Home Labs.
 
 ## 🚀 Funcionalidades Principais
@@ -15,7 +17,7 @@ Um gerador HTML/JS leve e poderoso para criar ficheiros `autounattend.xml` à pr
 
 ## 💡 Como Usar
 
-1. Aceda à ferramenta online (se alojada) ou abra o ficheiro `index.html` em qualquer browser.
+1. Aceda à ferramenta oficial em [unattended.wintech.pt](https://unattended.wintech.pt).
 2. Preencha os dados do sistema e selecione o ambiente de destino. **Nota para Laboratórios:** Se usar Proxmox com discos SCSI/SATA e CD-ROM IDE, defina o ID do Disco para `1`.
 3. Clique em "Aplicar e Gerar XML".
 4. Coloque o ficheiro `autounattend.xml` gerado na **raiz** da sua Pen USB de instalação do Windows ou no interior da sua imagem ISO.
