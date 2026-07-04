@@ -1,3 +1,5 @@
+🚀 Versão Oficial e Live: Testa a ferramenta diretamente em [unattended.wintech.pt](https://unattended.wintech.pt)
+
 # Wintech Labs - Unattended Toolkit (XP Edition) 💿
 
 Um gerador HTML/JS leve e poderoso para criar ficheiros `autounattend.xml` à prova de falhas para o Windows 11. Especialmente otimizado para resolver os problemas de *Loop de Boot* nas builds mais recentes (24H2 / 25H2) em ambientes de virtualização e Home Labs.
